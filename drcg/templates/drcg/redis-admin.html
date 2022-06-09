@@ -1,0 +1,151 @@
+{% extends "admin/base_site.html" %}
+{% load humanize %}
+
+{% block title %}Redis diagnostics {{ block.super }}{% endblock %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <style>table {width: 100%;}</style>
+{% endblock %}
+
+{% block content_title %}<h1>Redis diagnostics</h1>{% endblock %}
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">Home</a> &rsaquo;
+        <a href="{% url 'admin:app_list' 'drcg' %}">DRCG</a> &rsaquo;
+        Redis info
+    </div>
+{% endblock %}
+
+{% block content %}
+
+<div id="content-main">
+
+    <div class="module">
+        <h2>Streams</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Length</th>
+                    <th>Groups</th>
+                    <th>First entry time</th>
+                    <th>Last entry</th>
+                    <th>Last entry time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stream in streams %}
+                    <tr class = "{% cycle 'row1' 'row2' %}">
+                        <th>
+                            {{ stream.name }}
+                        </th>
+                        <td>
+                            {{ stream.length }}
+                        </td>
+                        <td>
+                            {{ stream.groups }}
+                        </td>
+                        <td>
+                            {{ stream.first_entry_ts | naturaltime }}
+                        </td>
+                        <td>
+                            <code>{{ stream.last_entry }}</code>
+                        </td>
+                        <td>
+                            {{ stream.last_entry_ts | naturaltime }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <br />
+    </div>
+    <div class="module">
+        <h2>ConsumerGroups</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Stream</th>
+                    <th>Consumers</th>
+                    <th>Pending messages</th>
+                    <th>Last delivered ID</th>
+                    <th>Last delivery</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for consumergroup in consumergroups %}
+                    <tr class = "{% cycle 'row1' 'row2' %}">
+                        <th>
+                            {{ consumergroup.name.decode }}
+                        </th>
+                        <td>
+                            {{ consumergroup.stream.name }}
+                        </td>
+                        <td>
+                            {{ consumergroup.consumers }}
+                        </td>
+                        <td>
+                            {{ consumergroup.pending }}
+                        </td>
+                        <td>
+                            {{ consumergroup.last_delivered_id.decode }}
+                        </td>
+                        <td>
+                            {{ consumergroup.last_delivered_ts | naturaltime }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <br />
+    </div>
+    <div class="module">
+        <h2>Consumers</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Group</th>
+                    <th>Stream</th>
+                    <th>Pending messages</th>
+                    <th>Current message</th>
+                    <th>Last delivery/ACK</th>
+                    <th>Delete?</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for consumer in consumers %}
+                    <tr class = "{% cycle 'row1' 'row2' %}">
+                        <th>
+                            {{ consumer.name.decode }}
+                        </th>
+                        <td>
+                            {{ consumer.group.name }}
+                        </td>
+                        <td>
+                            {{ consumer.stream.name }}
+                        </td>
+                        <td>
+                            {{ consumer.pending }}
+                        </td>
+                        <td>
+                            <code>{{ consumer.pending_message }}</code>
+                        </td>
+                        <td>
+                            {{ consumer.last_action_ts | naturaltime }}
+                        </td>
+                        <td>
+                            <a href="{% url 'admin:drcg_redisinfo_delete' 0 %}?stream={{consumer.stream.name}}&group={{consumer.group.name}}&consumer={{consumer.name.decode}}">✕</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <br />
+    </div>
+</div>
+
+{% endblock %}
