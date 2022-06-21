@@ -1,10 +1,6 @@
-import json
 from django.core.management.base import BaseCommand, CommandError
 from django.db import NotSupportedError
-from ...redis_client import redis_client
-from ... import models
-import redis
-import time
+from ...redis import redis_client, RedisStream, RedisConsumerGroup, RedisConsumer
 import logging
 
 logger = logging.getLogger(__name__)
@@ -19,7 +15,6 @@ class Command(BaseCommand):
         return super().add_arguments(parser)
 
     def handle(self, consumer_name, stream_name, group_name, **options):
-        logger.info(f"Starting worker '{consumer_name}' in group '{group_name}' on stream '{stream_name}'...")
 
         vmajor, vminor, vpatch = redis_client.info()['redis_version'].split('.')
         if int(vmajor) < 5:
@@ -29,7 +24,10 @@ class Command(BaseCommand):
         if not use_xautoclaim:
             logger.warning(f"Message recovery via XAUTOCLAIM not available in this Redis version (have {vmajor}.{vminor}.{vpatch}, need >= 6.2.0)")
 
-        group = models.RedisConsumerGroup(group_name, stream_name)
-        consumer = models.RedisConsumer(consumer_name)
+        group = RedisConsumerGroup(group_name, stream_name)
+        consumer = RedisConsumer(consumer_name)
 
-        consumer.run(group, autoclaim=use_xautoclaim)
+        try:
+            consumer.run(group, autoclaim=use_xautoclaim)
+        except KeyboardInterrupt:
+            print()

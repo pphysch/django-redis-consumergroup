@@ -1,18 +1,10 @@
 import time
-from drcg import tasks, models
+from django.utils import timezone
+from drcg import tasks, redis
 
-default_cg = models.RedisConsumerGroup()
-
-@tasks.register
-def easy_task(n):
-    return n+1
+default_cg = redis.RedisConsumerGroup()
 
 @tasks.register
-def medium_task(n):
-    time.sleep(5)
-    return n*2
-
-@tasks.register
-def hard_task(n):
-    time.sleep(60)
-    return n**2
+def test_task(seconds: float) -> None:
+    time.sleep(seconds)
+    return timezone.now()

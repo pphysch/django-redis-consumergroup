@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 from django.contrib import admin
 from . import models
-from .redis_client import redis_client
+from .redis import redis_client
 
 def delete_consumer(request):
     try:
@@ -12,12 +12,13 @@ def delete_consumer(request):
         redis_client.xgroup_delconsumer(stream, group, consumer)
     except KeyError as e:
         raise e
-        pass
-    redis_client.xr
 
     return redirect('admin:drcg_redisinfo_changelist')
 
 def redis_admin(request):
+    """
+    Transforms on-demand Redis XINFO output into a useful view.
+    """
     streams = list()
     consumergroups = list()
     consumers = list()

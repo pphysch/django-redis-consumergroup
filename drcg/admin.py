@@ -5,11 +5,13 @@ from . import models, views
 
 @admin.register(models.Scheduler)
 class SchedulerAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'stream_name', 'group_name', 'ready_time']
+    list_display = ['__str__', 'stream_name', 'ready_time']
     readonly_fields = ['last_message_id', 'ready_time']
 
-@admin.register(models.RedisInfo)
-class RedisInfoAdmin(admin.ModelAdmin):
+    # organize into nicer fieldsets
+
+@admin.register(models.RedisDiagnostics)
+class RedisDiagnosticsAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 

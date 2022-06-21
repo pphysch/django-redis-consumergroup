@@ -8,6 +8,9 @@ class DrcgConfig(AppConfig):
 
     def ready(self) -> None:
         from . import models
-        for s in models.Scheduler.objects.all():
-            models.RedisConsumerGroup(s.group_name, s.stream_name)
+        try:
+            for s in models.Scheduler.objects.all():
+                models.RedisConsumerGroup(s.group_name, s.stream_name)
+        except:
+            pass
         return super().ready()
