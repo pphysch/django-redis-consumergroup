@@ -174,7 +174,7 @@ class RedisConsumer:
         last_id = start_id
         has_backlog = process_backlog
 
-        logger.info(f"Starting worker '{self.name}' in group '{group.name}' on stream '{group.stream.name}'...")
+        logger.info(f"consumer '{self.name}' started_running {group.stream.name}:{group.name}")
         running = True
         while running:
             cur_id = last_id if has_backlog else '>'
@@ -187,13 +187,13 @@ class RedisConsumer:
             if not messages:
                 continue
 
-            logger.info(f"received_tasks {messages}")
+            logger.info(f"consumer '{self.name}' received_tasks {messages}")
 
             has_backlog = (len(messages[0][1]) > 0)
 
             for id, message in messages[0][1]:
-                logger.info(f"processing_task {id} {message}")
+                logger.info(f"consumer '{self.name}' processing_task {id} {message}")
                 result = self.handle_task(message)
                 redis_client.xack(group.stream.name, group.name, id)
-                logger.info(f"acknowledged_task_complete {id} result='{result}'")
+                logger.info(f"consumer '{self.name}' acknowledged_task_complete {id} result='{result}'")
                 last_id = id
