@@ -5,7 +5,7 @@ from . import models, views
 
 @admin.register(models.Scheduler)
 class SchedulerAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'stream_name', 'ready_time']
+    list_display = ['__str__', 'consumergroup', 'ready_time']
     readonly_fields = ['last_message_id', 'ready_time']
 
     # organize into nicer fieldsets

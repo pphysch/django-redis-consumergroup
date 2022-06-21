@@ -12,7 +12,10 @@ class Command(BaseCommand):
 
     def handle(self, poll_interval_seconds, **options):
         running = True
-        while running:
-            for task in models.Scheduler.objects.ready_to_launch():
-                task.launch()
-            time.sleep(poll_interval_seconds)
+        try:
+            while running:
+                for task in models.Scheduler.objects.ready_to_launch():
+                    task.launch()
+                time.sleep(poll_interval_seconds)
+        except KeyboardInterrupt:
+            print()

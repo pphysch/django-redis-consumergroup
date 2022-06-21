@@ -24,7 +24,7 @@ class Scheduler(models.Model):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._meta.get_field('task_name').choices = lazy(lambda: [(t,t) for t in sorted(task_registry.keys())], list)()
-        self._meta.get_field('stream_name').choices = lazy(lambda: [(s,s) for s in sorted(RedisStream.lookup.keys())], list)()
+        self._meta.get_field('consumergroup').choices = lazy(lambda: [(s,s) for s in sorted(RedisConsumerGroup.lookup.keys())], list)()
 
     task_name = models.CharField(
         max_length=255,
@@ -45,9 +45,10 @@ class Scheduler(models.Model):
         help_text="Apply a 5% jitter to the interval (e.g. 10s -> [9.5s, 10.5s])"
     )
     
-    stream_name = models.SlugField(
-        default="drcg",
-        choices=(("drcg","Reload page to view options"),),
+    consumergroup = models.CharField(
+        max_length=255,
+        default="drcg:drcg",
+        choices=(("drcg:drcg","Reload page to view options"),),
     )
 
     last_message_id = models.CharField(
@@ -60,7 +61,7 @@ class Scheduler(models.Model):
 
     def launch(self):
         """Try to launch this task"""
-        cg = RedisConsumerGroup(self.stream_name, self.group_name)
+        cg = RedisConsumerGroup.lookup[self.consumergroup]
 
         if self.last_message_id and not cg.check_completed(self.last_message_id.encode()):
             logger.debug(f"failed_to_launch_incomplete_task '{self}' pending_id {self.last_message_id}")

@@ -92,9 +92,9 @@ class RedisConsumerGroup:
 
         RedisConsumerGroup.lookup[self.fullname] = self
 
-    def enqueue(self, **kwargs):
+    def enqueue(self, task_name, **kwargs):
         """See RedisStream.enqueue"""
-        return self.stream.enqueue(**kwargs)
+        return self.stream.enqueue(task_name, **kwargs)
 
     def consumer_info(self):
         return redis_client.xinfo_consumers(self.stream.name, self.name)
