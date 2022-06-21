@@ -180,14 +180,14 @@ class RedisConsumer:
             cur_id = last_id if has_backlog else '>'
 
             messages = self.read(group, cur_id, block=block)
-            logger.info(f"received_tasks {messages}")
 
             if autoclaim and not messages:
                 messages = self.autoclaim(group)
-                logger.info(f"recovered_tasks {messages}")
                 
             if not messages:
                 continue
+
+            logger.info(f"received_tasks {messages}")
 
             has_backlog = (len(messages[0][1]) > 0)
 
