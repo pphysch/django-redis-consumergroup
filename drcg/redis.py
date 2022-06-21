@@ -38,7 +38,7 @@ class RedisStream:
     def enqueue(self, task_name, **task_kwargs):
         args = json.dumps(task_kwargs)
         message_id = redis_client.xadd(self.name, {"task":task_name, "args":args})
-        logger.debug(f"enqueued_task {self.name}:{message_id} {task_name} {args}")
+        logger.info(f"enqueued_task {self.name}:{message_id} {task_name} {args}")
         return message_id
 
     def info(self):
@@ -180,11 +180,11 @@ class RedisConsumer:
             cur_id = last_id if has_backlog else '>'
 
             messages = self.read(group, cur_id, block=block)
-            logger.debug(f"received_tasks {messages}")
+            logger.info(f"received_tasks {messages}")
 
             if autoclaim and not messages:
                 messages = self.autoclaim(group)
-                logger.debug(f"recovered_tasks {messages}")
+                logger.info(f"recovered_tasks {messages}")
                 
             if not messages:
                 continue
@@ -192,8 +192,8 @@ class RedisConsumer:
             has_backlog = (len(messages[0][1]) > 0)
 
             for id, message in messages[0][1]:
-                logger.debug(f"processing_task {id} {message}")
+                logger.info(f"processing_task {id} {message}")
                 result = self.handle_task(message)
                 redis_client.xack(group.stream.name, group.name, id)
-                logger.debug(f"acknowledged_task_complete {id} result='{result}'")
+                logger.info(f"acknowledged_task_complete {id} result='{result}'")
                 last_id = id

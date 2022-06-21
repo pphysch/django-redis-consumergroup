@@ -64,7 +64,7 @@ class Scheduler(models.Model):
         cg = RedisConsumerGroup.lookup[self.consumergroup]
 
         if self.last_message_id and not cg.check_completed(self.last_message_id.encode()):
-            logger.debug(f"failed_to_launch_incomplete_task '{self}' pending_id {self.last_message_id}")
+            logger.info(f"failed_to_launch_incomplete_task '{self}' pending_id {self.last_message_id}")
             return self.last_message_id
 
         self.last_message_id = cg.enqueue(self.task_name, **self.task_args).decode()
@@ -73,7 +73,7 @@ class Scheduler(models.Model):
         else:
             self.ready_time = timezone.now() + self.interval
         self.save()
-        logger.debug(f"launched_task '{self}'")
+        logger.info(f"launched_task '{self}'")
         return self.last_message_id
 
     def __str__(self):
