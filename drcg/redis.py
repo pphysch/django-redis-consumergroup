@@ -174,7 +174,7 @@ class RedisConsumer:
         last_id = start_id
         has_backlog = process_backlog
 
-        logger.info(f"consumer '{self.name}' started_running {group.stream.name}:{group.name}")
+        logger.info(f"consumer '{self.name}' started_running on '{group.stream.name}:{group.name}'")
         running = True
         while running:
             cur_id = last_id if has_backlog else '>'
